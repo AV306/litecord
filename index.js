@@ -10,7 +10,8 @@ let messageInput = document.getElementById( "message-input" )
 
 let token;
 let headers;
-let currentMessageLimit = 30;
+let messageLimit = 30;
+let lastMessageId;
 
 document.addEventListener( "keyup", event =>
 {
@@ -81,6 +82,8 @@ async function getServers()
 	}
 
 	let guildsData = await res.json();
+	guildSelector.innerHTML = null;
+	channelSelector.innerHTML = null;
 
 	for ( let guild of guildsData )
 	{
@@ -106,7 +109,6 @@ async function getChannels( selectObject )
 
 	let channels = await res.json();
 
-	
 	channelSelector.innerHTML = null;
 	for ( let channel of channels )
 	{
@@ -122,8 +124,11 @@ async function getChannels( selectObject )
 
 async function getMessages()
 {
-	setStatus( `Fetching messages for channel id ${channelSelector.value}` );
-	let res = await fetch( `${apiBase}/channels/${channelSelector.value}/messages?limit=${currentMessageLimit}`, { "headers": headers } );
+	let url = `${apiBase}/channels/${channelSelector.value}/messages?limit=${messageLimit}`
+	//if ( lastMessageId ) url += `&before=${lastMessageId}`;
+
+	setStatus( `Fetching ${messageLimit} messages for channel id ${channelSelector.value}` );
+	let res = await fetch( url, { "headers": headers } );
 
 	if ( !res.ok )
 	{
@@ -134,12 +139,16 @@ async function getMessages()
 	let messages = await res.json();
 	messagesPanel.innerHTML = null;
 
-	for ( let message of messages )
+	for ( let i = 0; i < messages.length; i++ )
 	{
+		let message = messages[i];
 		let m = document.createElement( "p" );
 		m.innerText = `${message.author.global_name}: ${message.content}`;
 		messagesPanel.insertBefore( m, messagesPanel.firstChild );
 	}
+
+	// Remember the ID of the last message
+	lastMessageId = messages[messages.length - 1].id;
 
 	setStatus( "Done fetching messages" );
 }
@@ -147,8 +156,31 @@ async function getMessages()
 
 async function getMoreMessages()
 {
-	await getMessages( currentMessageLimit );
-	currentMessageLimit += 30;
+	let url = `${apiBase}/channels/${channelSelector.value}/messages?limit=${messageLimit}&before=${lastMessageId}`
+
+	setStatus( `Fetching ${messageLimit} more messages for channel id ${channelSelector.value} before id ${lastMessageId}` );
+	let res = await fetch( url, { "headers": headers } );
+
+	if ( !res.ok )
+	{
+		setStatus( `Could not fetch messages (error ${res.status})` );
+		return;
+	}
+
+	let messages = await res.json();
+
+	for ( let i = 0; i < messages.length; i++ )
+	{
+		let message = messages[i];
+		let m = document.createElement( "p" );
+		m.innerText = `${message.author.global_name}: ${message.content}`;
+		messagesPanel.insertBefore( m, messagesPanel.firstChild );
+	}
+
+	// Remember the ID of the last message
+	lastMessageId = messages[messages.length - 1].id;
+
+	setStatus( `Done fetching more messages, last message is now ${lastMessageId}` );
 }
 
 async function sendMessage()
