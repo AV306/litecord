@@ -7,8 +7,25 @@ let guildSelector = document.getElementById( "guild-select" );
 let channelSelector = document.getElementById( "channel-select" );
 let messagesPanel = document.getElementById( "messages-panel" );
 let messageInput = document.getElementById( "message-input" )
+
 let token;
 let headers;
+let currentMessageLimit = 30;
+
+document.addEventListener( "keyup", event =>
+{
+	if ( !event.shiftKey && event.code === 'Enter' )
+		switch ( document.activeElement.id )
+		{
+			case tokenInput.id:
+				validateToken();
+				break;
+			case messageInput.id:
+				sendMessage();
+				break;
+		}
+} );
+	
 
 /*async function fetchJson( url, headers )
 {
@@ -103,10 +120,10 @@ async function getChannels( selectObject )
 	setStatus( "Done fetching channels" );
 }
 
-async function getMessages( selectObject )
+async function getMessages()
 {
-	setStatus( `Fetching messages for channel id ${selectObject.value}` );
-	let res = await fetch( `${apiBase}/channels/${selectObject.value}/messages?limit=20`, { "headers": headers } );
+	setStatus( `Fetching messages for channel id ${channelSelector.value}` );
+	let res = await fetch( `${apiBase}/channels/${channelSelector.value}/messages?limit=${currentMessageLimit}`, { "headers": headers } );
 
 	if ( !res.ok )
 	{
@@ -125,6 +142,13 @@ async function getMessages( selectObject )
 	}
 
 	setStatus( "Done fetching messages" );
+}
+
+
+async function getMoreMessages()
+{
+	await getMessages( currentMessageLimit );
+	currentMessageLimit += 30;
 }
 
 async function sendMessage()
