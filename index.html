@@ -11,8 +11,14 @@
   <label for="token-input">Token</label>
   <input id="token-input" type="text">
   <button id="validate-token" onclick="validateToken()">Validate Token</button>
-  <span id="user-info">Unknown user</span>
-  <p id="status">LiteCord ready</p>
+  <span>Logged in as: </span><span id="user-info">Unknown user</span>
+  <select name="online-status" id="online-status-select" onchange="changeOnlineStatus( this )">
+    <option value="online">Online</option>
+    <option value="offline">Invisible</option>
+    <option value="dnd">Do Not Disturb</option>
+    <option value="idle">Idle</option>
+  </select>
+  <p id="litecord-status">LiteCord ready</p>
   </div>
 
   <div id="menu-bar">
@@ -27,7 +33,11 @@
 
   <div id="messages-panel"></div>
 
-  <div id="text-input-panel"></div>
+  <div id="text-input-panel">
+    <input id="message-input" type="text" placeholder="Enter message">
+    <button id="send-message-button" onclick="sendMessage()">Send</button>
+  </div>
+
   <script src="index.js"></script>
 </body>
 </html>

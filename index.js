@@ -1,6 +1,12 @@
 const apiBase = "https://discord.com/api";
+
+let tokenInput = document.getElementById( "token-input" );
 let userDataBar = document.getElementById( "user-info" );
-let statusBar = document.getElementById( "status" );
+let statusBar = document.getElementById( "litecord-status" );
+let guildSelector = document.getElementById( "guild-select" );
+let channelSelector = document.getElementById( "channel-select" );
+let messagesPanel = document.getElementById( "messages-panel" );
+let messageInput = document.getElementById( "message-input" )
 let token;
 let headers;
 
@@ -19,7 +25,7 @@ function setStatus( text )
 async function validateToken()
 {
 	setStatus( "Checking token..." );
-	token = document.getElementById( "token-input" ).value;
+	token = tokenInput.value;
 
 	headers = {
 		"Authorization": token,
@@ -48,7 +54,7 @@ async function validateToken()
 
 async function getServers()
 {
-	setStatus( "Fetchiing servers, please wait..." );
+	setStatus( "Fetching servers, please wait..." );
 	let res = await fetch( `${apiBase}/users/@me/guilds`, { "headers": headers } );
 
 	if ( !res.ok )
@@ -59,14 +65,13 @@ async function getServers()
 
 	let guildsData = await res.json();
 
-	let guildsSelector = document.getElementById( "guild-select" );
 	for ( let guild of guildsData )
 	{
 		let guildOption = document.createElement( "option" );
 		guildOption.value = guild.id;
 		guildOption.innerText = guild.name;
 		//guildOption.id = guild.id;
-		guildsSelector.add( guildOption );
+		guildSelector.add( guildOption );
 	}
 	setStatus( "Done fetching servers" );
 }
@@ -84,7 +89,7 @@ async function getChannels( selectObject )
 
 	let channels = await res.json();
 
-	let channelSelector = document.getElementById( "channel-select" );
+	
 	channelSelector.innerHTML = null;
 	for ( let channel of channels )
 	{
@@ -101,7 +106,7 @@ async function getChannels( selectObject )
 async function getMessages( selectObject )
 {
 	setStatus( `Fetching messages for channel id ${selectObject.value}` );
-	let res = await fetch( `${apiBase}/channels/${selectObject.value}/messages?limit=30`, { "headers": headers } );
+	let res = await fetch( `${apiBase}/channels/${selectObject.value}/messages?limit=20`, { "headers": headers } );
 
 	if ( !res.ok )
 	{
@@ -110,14 +115,41 @@ async function getMessages( selectObject )
 	}
 
 	let messages = await res.json();
-	let messagesPanel = document.getElementById( "messages-panel" );
+	messagesPanel.innerHTML = null;
 
 	for ( let message of messages )
 	{
 		let m = document.createElement( "p" );
-		m.innerText = message.content;
-		messagesPanel.appendChild( m );
+		m.innerText = `${message.author.global_name}: ${message.content}`;
+		messagesPanel.insertBefore( m, messagesPanel.firstChild );
 	}
 
 	setStatus( "Done fetching messages" );
+}
+
+async function sendMessage()
+{
+	let currentChannelId = channelSelector.value;
+	setStatus( `Sending message ${messageInput.value} to channel id ${currentChannelId}` );
+
+	let res = await fetch(
+		`${apiBase}/channels/${currentChannelId}/messages`,
+		{
+			"headers": headers,
+			"method": "POST",
+			"body": JSON.stringify(
+				{
+					"content": messageInput.value
+				}
+			)
+		}
+	);
+
+	if ( res.ok )
+	{
+		setStatus( "Sent message" );
+		getMessages( channelSelector );
+		messageInput.value = null;
+	}
+	else setStatus( `Error sending message (error ${res.status})` );
 }
