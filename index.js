@@ -10,6 +10,7 @@ let messageInput = document.getElementById( "message-input" )
 
 let token;
 let headers;
+let currentUser;
 let messageLimit = 30;
 let lastMessageId;
 
@@ -52,14 +53,14 @@ async function validateToken()
 	
 	// Try GETting current user endpoint
 	// If status is 401, then token is invalid
-	response = await fetch( `${apiBase}/users/@me`, { "headers": headers } );
+	let response = await fetch( `${apiBase}/users/@me`, { "headers": headers } );
 
 	if ( response.ok )
 	{
 		// Get user data
-		let userData = await response.json();
+		currentUser = await response.json();
 		//userDataBar.innerText = `${userData.display_name} (${userData.username})`;
-		userDataBar.innerText = userData.username;
+		userDataBar.innerText = currentUser.username;
 		setStatus( "Valid token provided!" );
 
 		getServers();
@@ -82,7 +83,7 @@ async function getServers()
 	}
 
 	let guildsData = await res.json();
-	guildSelector.innerHTML = null;
+	//guildSelector.innerHTML = null;
 	channelSelector.innerHTML = null;
 
 	for ( let guild of guildsData )
@@ -98,8 +99,18 @@ async function getServers()
 
 async function getChannels( selectObject )
 {
+	let url;
+	let isDirectMessages = false;
+	if ( selectObject.value === "dms" )
+	{
+		url = `${apiBase}/users/@me/channels`;
+		isDirectMessages = true;
+	}
+	else url = `${apiBase}/guilds/${selectObject.value}/channels`;
+
 	setStatus( `Fetching channels for server id ${selectObject.value}` );
-	let res = await fetch( `${apiBase}/guilds/${selectObject.value}/channels`, { "headers": headers } );
+
+	let res = await fetch( url, { "headers": headers } );
 
 	if ( !res.ok )
 	{
@@ -110,13 +121,32 @@ async function getChannels( selectObject )
 	let channels = await res.json();
 
 	channelSelector.innerHTML = null;
+	messagesPanel.innerHTML = null;
+	let mostRecentChannelGroup = document.createElement( "optgroup" );
+	mostRecentChannelGroup.label = "Uncategorised";
+	channelSelector.appendChild( mostRecentChannelGroup );
 	for ( let channel of channels )
 	{
-		let channelOption = document.createElement( "option" );
-		channelOption.value = channel.id;
-		channelOption.innerText = channel.name;
-		//channelOption.id = 
-		channelSelector.add( channelOption );
+		if ( channel.type == 4 )
+		{
+            let channelGroup = document.createElement( "optgroup" );
+			channelGroup.label = channel.name;
+			channelSelector.appendChild( channelGroup );
+			mostRecentChannelGroup = channelGroup;
+		}
+		else
+		{
+			let channelOption = document.createElement( "option" );
+			channelOption.value = channel.id;
+			if ( isDirectMessages )
+			{
+				for ( let user of channel.recipients )
+					channelOption.innerText += `${user.username}, `;
+			}
+			else channelOption.innerText = channel.name;
+				
+			mostRecentChannelGroup.appendChild( channelOption );
+		}
 	}
 
 	setStatus( "Done fetching channels" );
@@ -136,19 +166,7 @@ async function getMessages()
 		return;
 	}
 
-	let messages = await res.json();
-	messagesPanel.innerHTML = null;
-
-	for ( let i = 0; i < messages.length; i++ )
-	{
-		let message = messages[i];
-		let m = document.createElement( "p" );
-		m.innerText = `${message.author.global_name}: ${message.content}`;
-		messagesPanel.insertBefore( m, messagesPanel.firstChild );
-	}
-
-	// Remember the ID of the last message
-	lastMessageId = messages[messages.length - 1].id;
+	insertMessages( await res.json(), true );
 
 	setStatus( "Done fetching messages" );
 }
@@ -167,20 +185,26 @@ async function getMoreMessages()
 		return;
 	}
 
-	let messages = await res.json();
+	insertMessages( await res.json(), false );
 
-	for ( let i = 0; i < messages.length; i++ )
+	setStatus( `Done fetching more messages, last message is now ${lastMessageId}` );
+}
+
+function insertMessages( messages, clear )
+{
+	if ( clear ) messagesPanel.innerHTML = null;
+
+	for ( let message of messages )
 	{
-		let message = messages[i];
 		let m = document.createElement( "p" );
-		m.innerText = `${message.author.global_name}: ${message.content}`;
+		m.classList.add( "message" );
+		let dateString = new Date( message.edited_timestamp ?? message.timestamp ).toLocaleString();
+		m.innerHTML = `(${dateString}) <strong>${message.author.global_name}:</strong> ${message.content}`;
 		messagesPanel.insertBefore( m, messagesPanel.firstChild );
 	}
 
 	// Remember the ID of the last message
 	lastMessageId = messages[messages.length - 1].id;
-
-	setStatus( `Done fetching more messages, last message is now ${lastMessageId}` );
 }
 
 async function sendMessage()
@@ -203,9 +227,30 @@ async function sendMessage()
 
 	if ( res.ok )
 	{
-		setStatus( "Sent message" );
+		setStatus( `Sent message to channel id ${currentChannelId}` );
 		getMessages( channelSelector );
 		messageInput.value = null;
 	}
 	else setStatus( `Error sending message (error ${res.status})` );
+}
+
+function switchPage( pageId )
+{
+	for ( let div of document.getElementsByTagName( "div" ) )
+	{
+		if( div.id.includes( "-page" ) )
+		{
+			if ( div.id === pageId ) div.classList.remove( "hidden" );
+			else div.classList.add( "hidden" );
+		}
+	}
+}
+
+async function getFriends()
+{
+	setStatus( "Fetching friends of " + currentUser.username );
+	//alert( Object.keys( currentUser ) );
+	let res = await fetch( `${apiBase}/users/@me/friends`, { "headers": headers } );
+	alert( res.status );
+	setStatus( "Done fetching friends" )
 }

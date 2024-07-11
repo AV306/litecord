@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <link rel="stylesheet" href="index.css">
-  <title>Hi there!</title>
+  <title>LiteCord</title>
 </head>
 
 <body>
@@ -12,30 +12,45 @@
   <input id="token-input" type="text">
   <button id="validate-token" onclick="validateToken()">Validate Token</button>
   <span>Logged in as: </span><span id="user-info">Unknown user</span>
-  <select name="online-status" id="online-status-select" onchange="changeOnlineStatus( this )">
-    <option value="online">Online</option>
-    <option value="offline">Invisible</option>
-    <option value="dnd">Do Not Disturb</option>
-    <option value="idle">Idle</option>
+  <label for="online-status-select">Status:</label>
+  <select name="online-status-select" id="online-status-select" onchange="changeOnlineStatus( this )">
+    <option value="0">Offline</option>
+    <option value="1">Online</option>
+    <option value="2">Idle</option>
+    <option value="3">Do Not Disturb</option>
+  </select>
+  <select name="page-select" id="page-select" onchange="switchPage( this.value )">
+    <option value="main-page">Main</option>
+    <option value="friends-page">Friends</option>
   </select>
   <p id="litecord-status">LiteCord ready</p>
   </div>
 
-  <div id="menu-bar">
-    <select name="guilds" id="guild-select" onchange="getChannels( this )">
-      <option value="dms">(DMs)</option>
-    </select>
+  <div id="main-page">
+    <div id="menu-bar">
+      <select name="guilds" id="guild-select" onchange="getChannels( this )">
+        <option value="dms">(Direct messages)</option>
+      </select>
 
-    <select name="channels" id="channel-select" onchange="getMessages()"></select>
+      <select name="channels" id="channel-select" onchange="getMessages()"></select>
 
-    <button id="load-more-messages" onclick="getMoreMessages()">Load more messages</button>
+      <button id="load-more-messages" onclick="getMoreMessages()">Load more messages</button>
+    </div>
+
+    <div id="messages-panel"></div>
+
+    <div id="text-input-panel">
+      <textarea id="message-input" type="text" placeholder="Enter message"></textarea>
+      <button id="send-message-button" onclick="sendMessage()">Send</button>
+    </div>
   </div>
 
-  <div id="messages-panel"></div>
+  <div id="friends-page" class="hidden">
+    <!--<h1>Friends</h1>-->
+    <button id="refresh-friends-button" onclick="getFriends()">Refresh Friends list</button>
+    <div id="friends-panel" onload="getFriends()">
 
-  <div id="text-input-panel">
-    <textarea id="message-input" type="text" placeholder="Enter message"></textarea>
-    <button id="send-message-button" onclick="sendMessage()">Send</button>
+    </div>
   </div>
 
   <script src="index.js"></script>
