@@ -7,6 +7,7 @@ let guildSelector = document.getElementById( "guild-select" );
 let channelSelector = document.getElementById( "channel-select" );
 let messagesPanel = document.getElementById( "messages-panel" );
 let messageInput = document.getElementById( "message-input" )
+let friendsPanel = document.getElementById( "friends-panel" );
 
 let token;
 let headers;
@@ -250,7 +251,25 @@ async function getFriends()
 {
 	setStatus( "Fetching friends of " + currentUser.username );
 	//alert( Object.keys( currentUser ) );
-	let res = await fetch( `${apiBase}/users/@me/friends`, { "headers": headers } );
-	alert( res.status );
+	let res = await fetch( `${apiBase}/users/@me/relationships`, { "headers": headers } );
+
+	if ( !res.ok )
+	{
+		setStatus( `Failed to fetch friends (error ${res.status})` );
+		return;
+	}
+
+	let friends = await res.json();
+
+	setStatus( `User ${currentUser.username} has ${friends.length} friends` );
+
+	for ( let friend of friends )
+	{
+		let friendEntry = document.createElement( "p" );
+		if ( friend.nickname ) friendEntry.innerHTML = `<strong>${friend.nickname}</strong> (${friend.user.username})`;
+		else friendEntry.innerText = friend.user.username;
+		friendsPanel.appendChild( friendEntry );
+	}
+
 	setStatus( "Done fetching friends" )
 }

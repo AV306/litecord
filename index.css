@@ -11,6 +11,30 @@
 	border-style: solid;
 }*/
 
+#friends-panel {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+}
+
+/*#token-validation {
+	position: fixed;
+	top: 0px;
+	width: 100%;
+	background-color: azure;
+}*/
+
+#text-input-panel {
+	position: fixed;
+	bottom: 0px;
+	width: 100%;
+	background-color: azure;
+}
+
+p {
+	margin: 0.1%;
+}
+
 h2 {
 	font-size: 32;
 	text-decoration: underline;
@@ -21,26 +45,26 @@ p {
 }
 
 
-.flexrow {
+.flex-row {
 	display: flex;
 	flex-direction: row;
-	justify-content: center;
-	align-items: center;
+	/*justify-content: center;
+	align-items: center;*/
 	flex-grow: 1;
 	flex-shrink: 0;
 }
 
 /* Spacing for elements inside flexboxes */
-.flexrow > * {
+.flex-row > * {
 	margin-left: 5%;
 	margin-right: 5%;
 }
 
-.flexcolumn {
+.flex-column {
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
-	align-items: center;
+	/*justify-content: center;
+	align-items: center;*/
 }
 
 .blur {

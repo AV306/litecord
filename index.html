@@ -8,22 +8,22 @@
 
 <body>
   <div id="token-validation">
-  <label for="token-input">Token</label>
-  <input id="token-input" type="text">
-  <button id="validate-token" onclick="validateToken()">Validate Token</button>
-  <span>Logged in as: </span><span id="user-info">Unknown user</span>
-  <label for="online-status-select">Status:</label>
-  <select name="online-status-select" id="online-status-select" onchange="changeOnlineStatus( this )">
-    <option value="0">Offline</option>
-    <option value="1">Online</option>
-    <option value="2">Idle</option>
-    <option value="3">Do Not Disturb</option>
-  </select>
-  <select name="page-select" id="page-select" onchange="switchPage( this.value )">
-    <option value="main-page">Main</option>
-    <option value="friends-page">Friends</option>
-  </select>
-  <p id="litecord-status">LiteCord ready</p>
+    <label for="token-input">Token</label>
+    <input id="token-input" type="text">
+    <button id="validate-token" onclick="validateToken()">Validate Token</button>
+    <span>Logged in as: </span><span id="user-info">Unknown user</span>
+    <label for="online-status-select">Status:</label>
+    <select name="online-status-select" id="online-status-select" onchange="changeOnlineStatus( this )">
+      <option value="0">Offline</option>
+      <option value="1">Online</option>
+      <option value="2">Idle</option>
+      <option value="3">Do Not Disturb</option>
+    </select>
+    <select name="page-select" id="page-select" onchange="switchPage( this.value )">
+      <option value="main-page">Main</option>
+      <option value="friends-page">Friends</option>
+    </select>
+    <p id="litecord-status">LiteCord ready</p>
   </div>
 
   <div id="main-page">
