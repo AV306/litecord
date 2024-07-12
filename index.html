@@ -10,7 +10,7 @@
   <div id="token-validation">
     <label for="token-input">Token</label>
     <input id="token-input" type="text">
-    <button id="validate-token" onclick="validateToken()">Validate Token</button>
+    <button id="validate-token" onclick="validateToken()">Load LiteCord</button>
     <span>Logged in as: </span><span id="user-info">Unknown user</span>
     <label for="online-status-select">Status:</label>
     <select name="online-status-select" id="online-status-select" onchange="changeOnlineStatus( this )">
@@ -28,11 +28,13 @@
 
   <div id="main-page">
     <div id="menu-bar">
-      <select name="guilds" id="guild-select" onchange="getChannels( this )">
+      <select name="guilds" id="guild-select" onchange="getChannels()">
         <option value="dms">(Direct messages)</option>
       </select>
 
       <select name="channels" id="channel-select" onchange="getMessages()"></select>
+
+      <button id="reload" onclick="reloadMainPage()">Reload</button>
 
       <button id="load-more-messages" onclick="getMoreMessages()">Load more messages</button>
     </div>

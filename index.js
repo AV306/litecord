@@ -12,7 +12,7 @@ let friendsPanel = document.getElementById( "friends-panel" );
 let token;
 let headers;
 let currentUser;
-let messageLimit = 30;
+let messageLimit = 20;
 let lastMessageId;
 
 document.addEventListener( "keyup", event =>
@@ -42,6 +42,22 @@ function setStatus( text )
 	statusBar.innerText = text;
 }
 
+async function loadMainPage()
+{
+	setStatus( "Loading..." );
+	await getServers();
+	await getChannels();
+	await getMessages();
+}
+
+function reloadMainPage()
+{
+	setStatus( "Reloading" );
+	if ( channelSelector.value ) getMessages();
+	else if ( guildSelector.value ) getChannels();
+	else getServers();
+}
+
 async function validateToken()
 {
 	setStatus( "Checking token..." );
@@ -64,7 +80,7 @@ async function validateToken()
 		userDataBar.innerText = currentUser.username;
 		setStatus( "Valid token provided!" );
 
-		getServers();
+		loadMainPage();
 	}
 	else
 	{
@@ -89,27 +105,26 @@ async function getServers()
 
 	for ( let guild of guildsData )
 	{
-		let guildOption = document.createElement( "option" );
-		guildOption.value = guild.id;
-		guildOption.innerText = guild.name;
-		//guildOption.id = guild.id;
-		guildSelector.add( guildOption );
+		guildSelector.add( createGuildOption( guild ) );
 	}
 	setStatus( "Done fetching servers" );
 }
 
-async function getChannels( selectObject )
+function createGuildOption( guild )
+{
+	let guildOption = document.createElement( "option" );
+	guildOption.value = guild.id;
+	guildOption.innerText = guild.name;
+	return guildOption;
+}
+
+async function getChannels()
 {
 	let url;
-	let isDirectMessages = false;
-	if ( selectObject.value === "dms" )
-	{
-		url = `${apiBase}/users/@me/channels`;
-		isDirectMessages = true;
-	}
-	else url = `${apiBase}/guilds/${selectObject.value}/channels`;
+	if ( guildSelector.value === "dms" ) url = `${apiBase}/users/@me/channels`;
+	else url = `${apiBase}/guilds/${guildSelector.value}/channels`;
 
-	setStatus( `Fetching channels for server id ${selectObject.value}` );
+	setStatus( `Fetching channels for server id ${guildSelector.value}` );
 
 	let res = await fetch( url, { "headers": headers } );
 
@@ -130,27 +145,37 @@ async function getChannels( selectObject )
 	{
 		if ( channel.type == 4 )
 		{
-            let channelGroup = document.createElement( "optgroup" );
-			channelGroup.label = channel.name;
-			channelSelector.appendChild( channelGroup );
-			mostRecentChannelGroup = channelGroup;
+			let group = createChannelGroup( channel.name );
+			channelSelector.appendChild( group );
+			mostRecentChannelGroup = group;
 		}
-		else
-		{
-			let channelOption = document.createElement( "option" );
-			channelOption.value = channel.id;
-			if ( isDirectMessages )
-			{
-				for ( let user of channel.recipients )
-					channelOption.innerText += `${user.username}, `;
-			}
-			else channelOption.innerText = channel.name;
-				
-			mostRecentChannelGroup.appendChild( channelOption );
-		}
+		else mostRecentChannelGroup.appendChild( createChannelOption( channel ) );
 	}
 
 	setStatus( "Done fetching channels" );
+}
+
+function createChannelGroup( name )
+{
+	let group = document.createElement( "optgroup" );
+	group.label = name;
+	return group;	
+}
+
+function createChannelOption( channel )
+{
+	let channelOption = document.createElement( "option" );
+	channelOption.value = channel.id;
+
+	// Infer DM or regular channel by presence of `recipients` field
+	if ( channel.recipients )
+	{
+		for ( let user of channel.recipients )
+			channelOption.innerText += `${user.username}, `;
+	}
+	else channelOption.innerText = `${channel.type === 2 ? "(Voice) " : ""}${channel.name}`;
+
+	return channelOption;
 }
 
 async function getMessages()
@@ -197,6 +222,7 @@ function insertMessages( messages, clear )
 
 	for ( let message of messages )
 	{
+		// TODO: createMessage()
 		let m = document.createElement( "p" );
 		m.classList.add( "message" );
 		let dateString = new Date( message.edited_timestamp ?? message.timestamp ).toLocaleString();
@@ -266,10 +292,42 @@ async function getFriends()
 	for ( let friend of friends )
 	{
 		let friendEntry = document.createElement( "p" );
-		if ( friend.nickname ) friendEntry.innerHTML = `<strong>${friend.nickname}</strong> (${friend.user.username})`;
+		//alert( Object.getOwnPropertyNames( friend ) );
+		//alert( Object.getOwnPropertyNames( friend.user ) );
+		if ( friend.user.global_name ) friendEntry.innerHTML = `<strong>${friend.user.global_name}</strong> (${friend.user.username})\t[${friend.user.id}]`;
 		else friendEntry.innerText = friend.user.username;
+
+		let openDmButton = document.createElement( "button" );
+		openDmButton.id = friend.user.id;
+		openDmButton.innerText = "Open DM";
+		openDmButton.onclick = function () { openDm( openDmButton.id ); };
+
 		friendsPanel.appendChild( friendEntry );
+		friendsPanel.appendChild( openDmButton );
 	}
 
 	setStatus( "Done fetching friends" )
+}
+
+async function openDm( userId )
+{
+	let res = await fetch( `${apiBase}/users/@me/channels`,
+		{
+			"headers": headers,
+			"method": "POST",
+			"body": JSON.stringify( {
+				"recipient_id": userId
+			} )
+		}
+	);
+
+	if ( !res.ok )
+	{
+		setStatus( `Failed to open DM with user id ${userId} (error ${res.status})` );
+		return;
+	}
+
+	let newChannelObject = await res.json();
+
+	setStatus( `Opened DM with ${newChannelObject.recipients[0].username}` );
 }
