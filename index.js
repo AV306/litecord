@@ -15,6 +15,8 @@ let currentUser;
 let messageLimit = 20;
 let lastMessageId;
 
+//let knownUsers = {};
+
 document.addEventListener( "keyup", event =>
 {
 	if ( !event.shiftKey && event.code === 'Enter' )
@@ -42,12 +44,17 @@ function setStatus( text )
 	statusBar.innerText = text;
 }
 
+/*async function getUser( userId )
+{
+
+}*/
+
 async function loadMainPage()
 {
 	setStatus( "Loading..." );
 	await getServers();
 	await getChannels();
-	await getMessages();
+	//await getMessages();
 }
 
 function reloadMainPage()
@@ -180,7 +187,7 @@ function createChannelOption( channel )
 
 async function getMessages()
 {
-	let url = `${apiBase}/channels/${channelSelector.value}/messages?limit=${messageLimit}`
+	let url = `${apiBase}/channels/${channelSelector.value}/messages?limit=${messageLimit}`;
 	//if ( lastMessageId ) url += `&before=${lastMessageId}`;
 
 	setStatus( `Fetching ${messageLimit} messages for channel id ${channelSelector.value}` );
@@ -197,10 +204,28 @@ async function getMessages()
 	setStatus( "Done fetching messages" );
 }
 
+async function getMessage( messageId )
+{
+	let url = `${apiBase}/channels/${channelSelector.value}/messages/${messageId}`;
+	//if ( lastMessageId ) url += `&before=${lastMessageId}`;
+
+	//setStatus( `Fetching ${messageLimit} messages for channel id ${channelSelector.value}` );
+	let res = await fetch( url, { "headers": headers } );
+
+	if ( !res.ok )
+	{
+		setStatus( `Could not fetch message id ${messageId} (error ${res.status})` );
+		return;
+	}
+
+	return await res.json();
+
+	//setStatus( "Done fetching messages" );
+}
 
 async function getMoreMessages()
 {
-	let url = `${apiBase}/channels/${channelSelector.value}/messages?limit=${messageLimit}&before=${lastMessageId}`
+	let url = `${apiBase}/channels/${channelSelector.value}/messages?limit=${messageLimit}&before=${lastMessageId}`;
 
 	setStatus( `Fetching ${messageLimit} more messages for channel id ${channelSelector.value} before id ${lastMessageId}` );
 	let res = await fetch( url, { "headers": headers } );
@@ -223,15 +248,34 @@ function insertMessages( messages, clear )
 	for ( let message of messages )
 	{
 		// TODO: createMessage()
-		let m = document.createElement( "p" );
-		m.classList.add( "message" );
-		let dateString = new Date( message.edited_timestamp ?? message.timestamp ).toLocaleString();
-		m.innerHTML = `(${dateString}) <strong>${message.author.global_name}:</strong> ${message.content}`;
-		messagesPanel.insertBefore( m, messagesPanel.firstChild );
+		messagesPanel.insertBefore( createMessageComponent( message ), messagesPanel.firstChild );
 	}
 
 	// Remember the ID of the last message
 	lastMessageId = messages[messages.length - 1].id;
+}
+
+function createMessageComponent( message )
+{
+	let m = document.createElement( "div" );
+	m.class = "message-entry";
+	m.id = message.id;
+	
+	let dateString = new Date( message.edited_timestamp ?? message.timestamp ).toLocaleString();
+
+	// Attach replied-to message if any
+	if ( message.referenced_message )
+	{
+		let repliedTo = document.createElement( "p" );
+		repliedTo.innerHTML = `<sub><strong>${message.referenced_message.author.global_name}:</strong> ${message.referenced_message.content}</sub>`;
+		m.appendChild( repliedTo );
+	}
+
+	let c = document.createElement( "p" );
+	c.innerHTML = `(${dateString}) <strong>${message.author.global_name}:</strong> ${message.content}`;
+	m.appendChild( c );
+
+	return m;
 }
 
 async function sendMessage()
@@ -291,6 +335,8 @@ async function getFriends()
 
 	for ( let friend of friends )
 	{
+		//knownUsers[friend.user.id] = friend.user;
+
 		let friendEntry = document.createElement( "p" );
 		//alert( Object.getOwnPropertyNames( friend ) );
 		//alert( Object.getOwnPropertyNames( friend.user ) );
@@ -302,11 +348,17 @@ async function getFriends()
 		openDmButton.innerText = "Open DM";
 		openDmButton.onclick = function () { openDm( openDmButton.id ); };
 
+		/*let getStatusButton = document.createElement( "button" );
+		getStatusButton.id = friend.user.id;
+		getStatusButton.innerText = "Check Status";
+		getStatusButton.onclick = function () { getStatus( friend.user.id ); };*/
+
 		friendsPanel.appendChild( friendEntry );
 		friendsPanel.appendChild( openDmButton );
+		//friendsPanel.appendChild( getStatusButton );
 	}
 
-	setStatus( "Done fetching friends" )
+	setStatus( "Done fetching friends" );
 }
 
 async function openDm( userId )
@@ -331,3 +383,20 @@ async function openDm( userId )
 
 	setStatus( `Opened DM with ${newChannelObject.recipients[0].username}` );
 }
+
+/*async function getStatus( id )
+{
+	setStatus( `Fetching status for user id ${id}` );
+	// settings-proto goes up to 3
+	let res = await fetch ( `${apiBase}/users/@me/settings-proto/3`, { "headers": headers } );
+
+	if ( !res.ok )
+	{
+		setStatus( `Failed to fetch status for user id ${id} (error ${res.status})` );
+		return;
+	}
+
+	let settingsProtobuf = await res.json();
+
+	alert( settingsProtobuf.settings );
+}*/
