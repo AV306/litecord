@@ -335,30 +335,33 @@ async function getFriends()
 
 	for ( let friend of friends )
 	{
-		//knownUsers[friend.user.id] = friend.user;
-
-		let friendEntry = document.createElement( "p" );
-		//alert( Object.getOwnPropertyNames( friend ) );
-		//alert( Object.getOwnPropertyNames( friend.user ) );
-		if ( friend.user.global_name ) friendEntry.innerHTML = `<strong>${friend.user.global_name}</strong> (${friend.user.username})\t[${friend.user.id}]`;
-		else friendEntry.innerText = friend.user.username;
-
-		let openDmButton = document.createElement( "button" );
-		openDmButton.id = friend.user.id;
-		openDmButton.innerText = "Open DM";
-		openDmButton.onclick = function () { openDm( openDmButton.id ); };
-
-		/*let getStatusButton = document.createElement( "button" );
-		getStatusButton.id = friend.user.id;
-		getStatusButton.innerText = "Check Status";
-		getStatusButton.onclick = function () { getStatus( friend.user.id ); };*/
-
-		friendsPanel.appendChild( friendEntry );
-		friendsPanel.appendChild( openDmButton );
-		//friendsPanel.appendChild( getStatusButton );
+		friendsPanel.append( createFriendComponent( friend ) );
 	}
 
 	setStatus( "Done fetching friends" );
+}
+
+function createFriendComponent( friend )
+{
+	let friendEntry = document.createElement( "p" );
+	//alert( Object.getOwnPropertyNames( friend ) );
+	//alert( Object.getOwnPropertyNames( friend.user ) );
+	if ( friend.user.global_name ) friendEntry.innerHTML = `<strong>${friend.user.global_name}</strong> (${friend.user.username})\t[${friend.user.id}]`;
+	else friendEntry.innerText = friend.user.username;
+
+	let openDmButton = document.createElement( "button" );
+	//openDmButton.id = friend.user.id;
+	openDmButton.innerText = "Open DM";
+	openDmButton.onclick = function () { openDm( friend.id ); };
+
+	let profileButton = document.createElement( "button" );
+	profileButton.innerText = "View profile";
+	profileButton.onclick = function () { getProfile( friend.id ); };
+
+	friendEntry.append( openDmButton );
+	friendEntry.append( profileButton );
+
+	return friendEntry;
 }
 
 async function openDm( userId )
@@ -384,19 +387,20 @@ async function openDm( userId )
 	setStatus( `Opened DM with ${newChannelObject.recipients[0].username}` );
 }
 
-/*async function getStatus( id )
+async function getProfile( id )
 {
-	setStatus( `Fetching status for user id ${id}` );
-	// settings-proto goes up to 3
-	let res = await fetch ( `${apiBase}/users/@me/settings-proto/3`, { "headers": headers } );
+	setStatus( `Fetching profile for user id ${id}` );
+	let res = await fetch( `${apiBase}/users/${id}/profile`, {"headers": headers} );
 
 	if ( !res.ok )
 	{
-		setStatus( `Failed to fetch status for user id ${id} (error ${res.status})` );
+		setStatus( `Failed to fetch profile for user id ${id}` );
 		return;
 	}
 
-	let settingsProtobuf = await res.json();
+	let profileData = await res.json();
 
-	alert( settingsProtobuf.settings );
-}*/
+	setStatus( `Fetched profile for user id ${id}` );
+
+	alert( `${profileData.user.global_name} (${profileData.user_profile.pronouns})\n\n${profileData.user_profile.bio}` );
+}
