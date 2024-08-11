@@ -1,6 +1,6 @@
 # LiteCord
 
-Minimal web-based Discord client, fully client-sided. Single-file if you stick the CSS and JS insde the main HTML file.
+Minimal web-based Discord client, fully client-sided. Single-file if you stick the CSS and JS insde the main HTML file. 327 LoC!
 
 ## Usage
 
