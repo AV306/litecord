@@ -2,7 +2,8 @@
 	--background-color: #2b333b;
 	--background-accent-color: #4b6875;
 	--background-inset-color: #202026;
-	--foreground-color: #efefef;
+	--foreground-color: #f0f0f0;
+	--foreground-inset-color: #cbcbcb;
 }
 
 body {
@@ -25,6 +26,10 @@ body {
 	padding-bottom: 0.2em; */
 }
 
+.static-text {
+	color: var( --foreground-inset-color );
+}
+
 select, button {
 	background-color: var( --background-accent-color );
 	color: var( --foreground-color );
@@ -36,7 +41,8 @@ select, button {
 
 input, textarea {
 	background-color: var( --background-inset-color );
-	border-color: var( --background-inset-color );
+	border-color: var( --background-accent-color );
+	/* border-color: var( --background-inset-color ); */
 }
 
 #litecord-status {

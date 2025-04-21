@@ -3,28 +3,34 @@
 <html lang="en">
 <head>
   <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="index_dark.css">
   <title>LiteCord</title>
 </head>
 
 <body>
-  <div id="token-validation">
-    <label for="token-input">Token</label>
-    <input id="token-input" type="text">
-    <button id="validate-token" onclick="validateToken()">Load LiteCord</button>
-    <span>Logged in as: </span><span id="user-info">Unknown user</span>
-    <label for="online-status-select">Status:</label>
-    <select name="online-status-select" id="online-status-select" onchange="changeOnlineStatus( this )">
-      <option value="0">Offline</option>
-      <option value="1">Online</option>
-      <option value="2">Idle</option>
-      <option value="3">Do Not Disturb</option>
-    </select>
-    <select name="page-select" id="page-select" onchange="switchPage( this.value )">
-      <option value="main-page">Main</option>
-      <option value="friends-page">Friends</option>
-    </select>
-    <p id="litecord-status">LiteCord ready</p>
-  </div>
+  <header>
+    <div id="token-validation">
+      <label for="token-input">Token:</label>
+      <input id="token-input" type="text">
+      <button id="validate-token" onclick="validateToken()">Load LiteCord</button>
+    </div>
+    <div id="user-info"></div>
+      <span class="static-text">Logged in as: </span><span id="user-info">Unknown user</span>
+      <label for="online-status-select" class="static-text">Status: </label>
+      <select name="online-status-select" id="online-status-select" onchange="changeOnlineStatus( this )">
+        <option value="0">Offline</option>
+        <option value="1">Online</option>
+        <option value="2">Idle</option>
+        <option value="3">Do Not Disturb</option>
+      </select>
+      <select name="page-select" id="page-select" onchange="switchPage( this.value )">
+        <option value="main-page">Main</option>
+        <option value="friends-page">Friends</option>
+      </select>
+    </div>
+  </header>
+
+  <p id="litecord-status">Litecord ready</p>
 
   <div id="main-page">
     <div id="menu-bar">

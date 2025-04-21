@@ -17,9 +17,15 @@ let lastMessageId;
 
 //let knownUsers = {};
 
+onerror = (message, source, lineno, colno, error) =>
+{
+	setStatusHtml( `<span style="color: red;">[INTERNAL ERROR]</span> ${error}` );
+};
+
 document.addEventListener( "keyup", event =>
 {
 	if ( !event.shiftKey && event.code === 'Enter' )
+	{
 		switch ( document.activeElement.id )
 		{
 			case tokenInput.id:
@@ -29,6 +35,7 @@ document.addEventListener( "keyup", event =>
 				sendMessage();
 				break;
 		}
+	}
 } );
 
 function toggleTheme()
@@ -58,6 +65,11 @@ function toggleTheme()
 function setStatus( text )
 {
 	statusBar.innerText = text;
+}
+
+function setStatusHtml( html )
+{
+	statusBar.innerHTML = html;
 }
 
 /*async function getUser( userId )
@@ -159,6 +171,8 @@ async function getChannels()
 
 	let channels = await res.json();
 
+	// FIXME: this is a very breakable heuristic relying on the order
+	// in which channels are reported, which is technically undefined
 	channelSelector.innerHTML = null;
 	messagesPanel.innerHTML = null;
 	let mostRecentChannelGroup = document.createElement( "optgroup" );
@@ -166,7 +180,7 @@ async function getChannels()
 	channelSelector.appendChild( mostRecentChannelGroup );
 	for ( let channel of channels )
 	{
-		if ( channel.type == 4 )
+		if ( channel.type === 4 ) // FIXME: document magic number
 		{
 			let group = createChannelGroup( channel.name );
 			channelSelector.appendChild( group );
@@ -193,8 +207,12 @@ function createChannelOption( channel )
 	// Infer DM or regular channel by presence of `recipients` field
 	if ( channel.recipients )
 	{
-		for ( let user of channel.recipients )
-			channelOption.innerText += `${user.username}, `;
+		if ( channel.recipients.length > 0 )
+		{
+			for ( let user of channel.recipients )
+				channelOption.innerText += `${user.username}, `;
+		}
+		else channelOption.innerText = user.username;
 	}
 	else channelOption.innerText = `${channel.type === 2 ? "(Voice) " : ""}${channel.name}`;
 
@@ -244,7 +262,7 @@ async function getMoreMessages()
 	let url = `${apiBase}/channels/${channelSelector.value}/messages?limit=${messageLimit}&before=${lastMessageId}`;
 
 	setStatus( `Fetching ${messageLimit} more messages for channel id ${channelSelector.value} before id ${lastMessageId}` );
-	let res = await fetch( url, { "headers": headers } );
+	let res = await fetch( url, { "headers": headers, signal: AbortSignal.timeout( 5000 ) } );
 
 	if ( !res.ok )
 	{
