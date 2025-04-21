@@ -1,6 +1,6 @@
 # LiteCord
 
-Minimal web-based Discord client, fully client-sided. Single-file if you stick the CSS and JS insde the main HTML file. 327 LoC!
+Minimal web-based Discord client, fully client-side. Single-file if you stick the CSS and JS insde the main HTML file. 327 LoC!
 
 ## Usage
 
@@ -8,7 +8,7 @@ Requires your Discord token (this will **NOT** be transmitted anywhere besides t
 
 ## Disclaimer
 
-This is *almost definitely* a "third-party client", and thus is *very probably* AGAINST Discord ToS.
+This is *almost definitely* considered a "third-party client", and thus is *very probably* AGAINST Discord ToS.
 
 This is created for EDUCATIONAL PURPOSES ONLY. I claim NO RESPONSIBILITY for any consequences incurred as a result of using this project, including but not limited to getting banned from Discord.
 
@@ -16,7 +16,7 @@ Use AT YOUR OWN RISK.
 
 ### Safely getting your token
 
-You can get your token by using the Network page in Developer Tools. Start a capture, go to some random pages, look for a request to something like `https://discord.com/api/v9/channels/[some numbers]`. You'll find your token in `Request > Headers > Authorization`, copy the whole thing over.
+You can get your token by using the Network page in Developer Tools (Ctrl-Shift-I or F12 > Network). Start a capture (it should start automatically, actually), go to some random pages, look for a request to something like `https://discord.com/api/v9/channels/[some numbers]`. You'll find your token in `Request > Headers > Authorization` (look for `Authorization: Bearer [...]`; copy the part after "Bearer" over.
 
 ***DO NOT*** share your token with **ANYONE OR ANYTHING** else. This token grants *whoever* has it **COMPLETE ACCESS** to your account. (This is how people's accounts get hacked -- they probably ran something that grabbed their token)
 
@@ -38,4 +38,4 @@ Hosted here: [https://av306.github.io/litecord](https://av306.github.io/litecord
 
 ### Local
 
-Clone the repo, then open `index.html` in a web browser.
+Clone the repo, then open `index.html` in a web browser. No fancy runtimes or servers!
