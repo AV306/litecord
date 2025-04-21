@@ -30,7 +30,23 @@ document.addEventListener( "keyup", event =>
 				break;
 		}
 } );
-	
+
+function toggleTheme()
+{
+	let darkStyleNode = document.getElementById( "dark-style" );
+	if ( !darkStyleNode )
+	{
+		let darkStyle = document.createElement( "link" );
+		darkStyle.href = "index_dark.css";
+		darkStyle.rel = "stylesheet";
+		darkStyle.id = "dark-style";
+		document.head.appendChild( darkStyle );
+	}
+	else
+	{
+		document.head.removeChild( darkStyleNode );
+	}
+}
 
 /*async function fetchJson( url, headers )
 {

@@ -1,0 +1,86 @@
+:root {
+	--background-color: #2b333b;
+	--background-accent-color: #4b6875;
+	--background-inset-color: #202026;
+	--foreground-color: #efefef;
+}
+
+body {
+	font-family: "Noto Sans", sans-serif;
+	font-weight: 450;
+	font-size: 10pt;
+
+    color: var( --foreground-color );
+	background-color: var( --background-color );
+    
+	/*font-size: 1.3vw;
+	font-style: bold;
+	color: white;
+	text-align: center;
+	border-style: solid;*/
+
+	/* padding-left: 1em;
+	padding-right: 1em;
+	padding-top: 0.2em;
+	padding-bottom: 0.2em; */
+}
+
+select, button {
+	background-color: var( --background-accent-color );
+	color: var( --foreground-color );
+	border-color: var(--background-accent-color );
+	border-radius: 1em;
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+}
+
+input, textarea {
+	background-color: var( --background-inset-color );
+	border-color: var( --background-inset-color );
+}
+
+#litecord-status {
+	background-color: var( --background-inset-color );
+	margin: 0.4em 0px;
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+	padding-left: 1em;
+}
+
+#text-input-panel {
+	position: fixed;
+	bottom: 0px;
+	display: flex;
+	align-items: center;
+}
+
+#text-input-panel > * {
+	height: fit-content;
+	margin-right: 1em;
+}
+
+footer {
+	position: fixed;
+	bottom: 0px;
+	right: 0px;
+}
+
+/*#friends-panel {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+}*/
+
+/*#token-validation {
+	position: fixed;
+	top: 0px;
+	width: 100%;
+	background-color: azure;
+}*/
+
+/*#text-input-panel {
+	position: fixed;
+	bottom: 0px;
+	width: 100%;
+	background-color: azure;
+}*/
