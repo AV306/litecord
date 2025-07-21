@@ -2,14 +2,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
-	--background-color: #ffffff;
+	--background-color: #dddddd;
 	--background-accent-color: #b8ebf2;
 	--background-inset-color: #b5b5b5;
+	--background-inset-less-color: #cccccc;
 	--foreground-color: black;
 	--foreground-inset-color: #606060;
 }
 
+html {
+	height: 100%;
+}
+
 body {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	background: var( --background-color );
+	height: 100%;
+
+	margin-top: 0;
+	margin-bottom: 0;
+	padding: 0;
+}
+
+body * {
 	font-family: "Noto Sans", sans-serif;
 	font-weight: 450;
 	font-size: 10pt;
@@ -18,18 +35,24 @@ body {
 	color: white;
 	text-align: center;
 	border-style: solid;*/
+
+	touch-action: none;
 }
 
 header {
 	display: flex;
-}
-
-.static-text {
-	color: var( --foreground-inset-color );
+	flex-grow: 0;
+	flex-direction: row;
+	align-items: center;
+	margin-top: 0.4em;
 }
 
 header > * {
 	margin-right: 1em;
+}
+
+.static-text, label {
+	color: var( --foreground-inset-color );
 }
 
 #token-validation > * {
@@ -40,8 +63,15 @@ header > * {
 	margin-right: 1em;
 }
 
+
 #litecord-status {
 	background-color: var( --background-inset-color );
+	flex-grow: 0;
+
+	margin: 0.4em 0px;
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+	padding-left: 1em;
 }
 
 select, button {
@@ -50,22 +80,45 @@ select, button {
 	padding-bottom: 0.2em;
 }
 
-#litecord-status {
-	margin: 0.4em 0px;
-	padding-top: 0.2em;
-	padding-bottom: 0.2em;
-	padding-left: 1em;
+
+#main-page {
+	margin-top: auto;
+	flex-grow: 1;
+
+	display: flex;
+	flex-direction: column;
+	justify-items: start;
+}
+
+#menu-bar {
+	flex-grow: 0;
 }
 
 #messages-panel {
 	overflow: auto;
+	/*
+		This, together with flex-grow: 0; on all other elements, is the magic
+		that makes it fill the space.
+		see https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_box_alignment/Box_alignment_in_flexbox
+	*/
+	margin-top: auto;
+	flex-grow: 1;
+
+	background-color: var( --background-inset-less-color );
+}
+
+#messages-panel * {
+	color: var( --foreground-color );
 }
 
 #text-input-panel {
-	position: fixed;
-	bottom: 0px;
+	/*margin-top: auto;*/
+	flex-grow: 0;
+
+	/*bottom: 0px;*/
 	width: 100%;
 	display: flex;
+	flex-direction: row;
 	align-items: center;
 }
 
@@ -75,14 +128,24 @@ select, button {
 }
 
 #message-input {
-	width: 50%;
+	flex-grow: 1;
 }
 
-footer {
+#send-message-button {
+	width: fit-content;
+	flex-grow: 0;
+	/*margin-left: auto;*/
+}
+
+input, textarea {
+	color: var( --foreground-color );
+}
+
+/*footer {
 	position: fixed;
 	bottom: 0px;
 	right: 0px;
-}
+}*/
 
 
 /*#friends-panel {

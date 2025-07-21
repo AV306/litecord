@@ -1,7 +1,7 @@
 const apiBase = "https://discord.com/api";
 
 let tokenInput = document.getElementById( "token-input" );
-let userDataBar = document.getElementById( "user-info" );
+let userDataBar = document.getElementById( "user-info-text" );
 let statusBar = document.getElementById( "litecord-status" );
 let guildSelector = document.getElementById( "guild-select" );
 let channelSelector = document.getElementById( "channel-select" );
@@ -13,6 +13,7 @@ let token;
 let headers;
 let currentUser;
 let messageLimit = 20;
+let messageRefetchLimit = 2; // How many messages to re-fetch
 let lastMessageId;
 
 //let knownUsers = {};
@@ -35,6 +36,8 @@ document.addEventListener( "keyup", event =>
 				sendMessage();
 				break;
 		}
+
+		event.preventDefault();
 	}
 } );
 
@@ -107,12 +110,14 @@ async function validateToken()
 	// If status is 401, then token is invalid
 	let response = await fetch( `${apiBase}/users/@me`, { "headers": headers } );
 
+	setStatus( "Fetched user data" );
+
 	if ( response.ok )
 	{
 		// Get user data
-		currentUser = await response.json();
-		//userDataBar.innerText = `${userData.display_name} (${userData.username})`;
-		userDataBar.innerText = currentUser.username;
+		userData = await response.json();
+		userDataBar.innerText = `${userData.global_name} (${userData.username})`;
+		//userDataBar.innerText = currentUser.username;
 		setStatus( "Valid token provided!" );
 
 		loadMainPage();
@@ -219,12 +224,13 @@ function createChannelOption( channel )
 	return channelOption;
 }
 
-async function getMessages()
+async function getMessages( limit, insert=true )
 {
-	let url = `${apiBase}/channels/${channelSelector.value}/messages?limit=${messageLimit}`;
+	limit = limit ?? messageLimit;
+	let url = `${apiBase}/channels/${channelSelector.value}/messages?limit=${limit}`;
 	//if ( lastMessageId ) url += `&before=${lastMessageId}`;
 
-	setStatus( `Fetching ${messageLimit} messages for channel id ${channelSelector.value}` );
+	setStatus( `Fetching ${limit} messages for channel id ${channelSelector.value}` );
 	let res = await fetch( url, { "headers": headers } );
 
 	if ( !res.ok )
@@ -233,7 +239,11 @@ async function getMessages()
 		return;
 	}
 
-	insertMessages( await res.json(), true );
+	messages = await res.json();
+
+	insertMessages( messages, insert );
+
+	return messages;
 
 	setStatus( "Done fetching messages" );
 }
@@ -289,10 +299,16 @@ function insertMessages( messages, clear )
 	lastMessageId = messages[messages.length - 1].id;
 }
 
+function appendMessages( messages )
+{
+	for ( const message of messages.reverse() )
+		messagesPanel.appendChild( createMessageComponent( message ) );
+}
+
 function createMessageComponent( message )
 {
 	let m = document.createElement( "div" );
-	m.class = "message-entry";
+	m.classList.add(  "message-entry" );
 	m.id = message.id;
 	
 	let dateString = new Date( message.edited_timestamp ?? message.timestamp ).toLocaleString();
@@ -333,8 +349,23 @@ async function sendMessage()
 	if ( res.ok )
 	{
 		setStatus( `Sent message to channel id ${currentChannelId}` );
-		getMessages( channelSelector );
+
+		// Re-fetch {messageRefetchLimit} messages to avoid out-of-order problems
+		refetchedMessages = await getMessages( messageRefetchLimit, false );
+
+		for ( const message of refetchedMessages )
+		{
+			let t = document.getElementById( message.id );
+			//alert( t.outerHTML )
+			t.remove(); // FIXME: not working
+		}
+
+		appendMessages( refetchedMessages );
+
+		//getMessages( channelSelector );
 		messageInput.value = null;
+
+		setStatus( `Refetched ${messageRefetchLimit} messages` );
 	}
 	else setStatus( `Error sending message (error ${res.status})` );
 }

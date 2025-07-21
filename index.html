@@ -3,7 +3,6 @@
 <html lang="en">
 <head>
   <link rel="stylesheet" href="index.css">
-  <link rel="stylesheet" href="index_dark.css">
   <title>LiteCord</title>
 </head>
 
@@ -14,8 +13,8 @@
       <input id="token-input" type="text">
       <button id="validate-token" onclick="validateToken()">Load LiteCord</button>
     </div>
-    <div id="user-info"></div>
-      <span class="static-text">Logged in as: </span><span id="user-info">Unknown user</span>
+    <div id="user-info">
+      <span class="static-text">Logged in as: </span><span id="user-info-text">Unknown user</span>
       <label for="online-status-select" class="static-text">Status: </label>
       <select name="online-status-select" id="online-status-select" onchange="changeOnlineStatus( this )">
         <option value="0">Offline</option>
@@ -28,6 +27,7 @@
         <option value="friends-page">Friends</option>
       </select>
     </div>
+     <button id="toggle-theme-button" onclick="toggleTheme()">Toggle theme</button>
   </header>
 
   <p id="litecord-status">Litecord ready</p>
@@ -53,17 +53,13 @@
     </div>
   </div>
 
-  <div id="friends-page" class="hidden">
+  <div id="page friends-page" class="hidden">
     <!--<h1>Friends</h1>-->
     <button id="refresh-friends-button" onclick="getFriends()">Refresh Friends list</button>
     <div id="friends-panel" onload="getFriends()">
 
     </div>
   </div>
-
-  <footer>
-    <button id="toggle-theme-button" onclick="toggleTheme()">Toggle theme</button>
-  </footer>
 
   <script src="index.js"></script>
 </body>
